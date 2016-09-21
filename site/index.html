@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Facebook Login JavaScript Example</title>
+<meta charset="UTF-8">
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<div id="login">
+  <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+  </fb:login-button>
+</div>
+<div id="lobbys">
+  <table>
+  </table>
+  <input id="lHeight" type="text" placeholder="Height">
+  <input id="lWidth" type="text" placeholder="Width">
+  <input id="lName" type="text"><button id="lCreate">createLobby</button>
+  <button id="lRefresh">Refresh</button>
+  <button id="login">login</button>
+</div>
+<div id="canvasId">
+  <canvas id="canvas"></canvas>
+</div>
+
+<script src="site/jquery-2.1.4.min.js"></script>
+<script src="site/board.js"></script>
+<script src="site/socket.js"></script>
+<script src="site/facebook.js"></script>
+</body>
+</html>
