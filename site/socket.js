@@ -2,6 +2,7 @@ var socket = io.connect();
 var c = document.getElementById("canvas");
 var ctx = c.getContext("2d");
 var canvasObj = null;
+var chatObj = null;
 socket.on('lobbys', function (data) {
 	$("#login").hide();
 	$("#lobbys").show();
@@ -16,7 +17,8 @@ socket.on('joinLobby', function(users, height, width) {
 	$("#cancasId").show();
 	c.width = width;
 	c.height = height;
-	canvasObj = new board(width, height, users, ctx);
+	chatObj = new chat();
+	canvasObj = new board(width, height, users, ctx, chatObj);
 	canvasObj.render();
 });
 socket.on('updateLobby', function (data) {
@@ -41,4 +43,44 @@ $("#lobbys").on("click", "#lJoin", function () {
 });
 $("#lobbys").on("click", "#login", function () {
 	socket.emit('login', "test fisker", "10210823945938196");
+});
+
+c.onclick = function(e){
+    socket.emit('move user', e.x, e.y);
+};
+
+$(document).keypress(function(e) {
+	// Make sure we get the right event
+	e = e || window.event;
+	var keyCode = typeof e.which === "number" ? e.which : e.keyCode;
+
+	// Which key was pressed?
+	switch (keyCode) {
+		// ENTER
+		case 13:
+			{
+
+				chatObj.emit(socket);
+				break;
+			}
+		default:
+			{
+				if (chatObj != null) {
+					chatObj.addLetter(String.fromCharCode(keyCode));
+					canvasObj.render();
+				}
+			}
+	}
+});
+$(document).keydown(function(e) {
+	e = e || window.event;
+	var keyCode = typeof e.which === "number" ? e.which : e.keyCode;
+
+	// BACKSPACE
+	if (keyCode === 8 && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+		e.preventDefault();
+		if (chatObj != null) {
+			chatObj.removeLetter();
+		}
+	}
 });

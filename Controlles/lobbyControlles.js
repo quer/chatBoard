@@ -33,4 +33,9 @@ module.exports = new function () {
 		}
 		return false;
 	}
+	this.update = function (delta) {
+		for (var i = 0; i < this.list.length; i++) {
+			this.list[i].update(delta);
+		}
+	}
 }

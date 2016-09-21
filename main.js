@@ -45,9 +45,31 @@ io.sockets.on('connection', function (socket) {
   	var lobbyObj = lobbyController.findLobby(roomName);
   	if (lobbyObj != null) {
   		lobbyObj.addUser(userObj);
+  		lobby = lobbyObj;
   		socket.emit("joinLobby", lobbyObj.serverUsers(), lobbyObj.height, lobbyObj.width);
   	}else{
   		console.log("lobby do not exist");
   	}
+  });
+  socket.on('move user', function(x, y) {
+  	console.log("move user: "+ userObj.name);
+  	if (lobby != null) {
+  		userObj.x = x-25;
+  		userObj.y = y-25;
+  		lobby.updateUsers();	
+  	}
+  });
+  socket.on('chat', function (text) {
+  	if (lobby != null) {
+  		userObj.chat = {"text": text, "time": new Date().getTime()};
+  		lobby.updateUsers();
+  	}
   })
 });
+
+
+var delta = 0;
+var theLoop = setInterval(function () {
+	lobbyController.update(delta);
+	delta++;
+}, 2000);
