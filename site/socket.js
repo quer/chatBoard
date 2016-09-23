@@ -81,6 +81,7 @@ $(document).keydown(function(e) {
 		e.preventDefault();
 		if (chatObj != null) {
 			chatObj.removeLetter();
+			canvasObj.render();
 		}
 	}
 });

@@ -2,6 +2,7 @@ var board = function (width, height, users, ctx, chat) {
 	this.width = width;
 	this.height = height;
 	this.users = users;
+	this.loadetImages = [];
 	this.chat = chat;
 	this.ctx = ctx;
 	this.render = function () {
@@ -15,31 +16,22 @@ var board = function (width, height, users, ctx, chat) {
         	console.log(this.users);
         	var that = this;
             for (var i = 0; i < this.users.length; i++) {
-				var imageObj = new Image();
-				var index = i;
-            	imageObj.onload = (function(nr) {
-            		return function() {
-			            console.log("index: "+index);
-				        that.ctx.drawImage(this, that.users[nr].poss.x, that.users[nr].poss.y);
-	       				that.ctx.textAlign="center"; 
-	       				that.ctx.fillText(that.users[nr].name, that.users[nr].poss.x + (this.width /2), that.users[nr].poss.y + this.height + 18);
-	       				if (that.users[nr].chat != null) {
-	       					ctx.textAlign="left";
-	       					var realText = that.createText(that.users[nr].chat);
-	       					var x = that.users[nr].poss.x + (this.width /2);
-	       					if (realText.textWidth + x > that.width) {
-	       						x - realText.textWidth;
-	       					}
-	       					var user = that.users[nr];
-	       					for (var ii = 0; ii < realText.text.length; ii++) {
-	       						
-	       						that.ctx.fillText(realText.text[ii], x, that.users[nr].poss.y - ((realText.text.length - ii) * 15));
-	       					}
-	       				}
-		            }
-			    }(index))
+				var imageExist = this.haveLoadetImage(this.users[i].id);
+				if (imageExist != null) {
+					this.drawUser(this.users[i], imageExist.image)
+				}else{
+					var imageObj = new Image();
+	            	imageObj.onload = (function(nr) {
+	            		return function() {
+				            console.log("index: "+ nr);
+					        that.loadetImages.push({"id": that.users[nr].id, "image": this});
+			            	that.drawUser(that.users[nr], this);
+			            }
+				    }(i))
 
-            	imageObj.src = 'https://graph.facebook.com/'+this.users[index].id+'/picture';
+	            	imageObj.src = 'https://graph.facebook.com/'+this.users[i].id+'/picture';	
+				}
+				
         		//this.ctx.drawimage(imageObj, 0, 0, imageObj.width, imageObj.height, this.users[i].x, this.users[i].y, imageObj.width, imageObj.height);    	
             	
 				//this.ctx.fillText(this.users[i].name,this.users[i].x + (imageObj.width /2),this.users[i].y + imageObj.height);
@@ -68,6 +60,39 @@ var board = function (width, height, users, ctx, chat) {
 			outputString += textArray[i];
 			index++;
 		}
+		returnStringArray.push(outputString);
+		if (this.ctx.measureText(outputString).width > textWidth) {
+			textWidth = this.ctx.measureText(outputString).width;
+		};
 		return {"textWidth": textWidth, "text": returnStringArray};
+	}
+	this.haveLoadetImage = function (userId) {
+		
+		for (var i = 0; i < this.loadetImages.length; i++) {
+			if (this.loadetImages[i].id = userId) {
+				return this.loadetImages[i];
+			}
+		}
+		return null;
+	}
+	this.drawUser = function (user, image) {
+		console.log(user.id + " | " + image.src);
+		this.ctx.drawImage(image, user.poss.x, user.poss.y);
+		this.ctx.textAlign="center"; 
+		this.ctx.fillText(user.name, user.poss.x + (image.width /2), user.poss.y + image.height + 18);
+		if (user.chat != null) {
+			this.ctx.textAlign="left";
+			var realText = this.createText(user.chat);
+			
+			var x = user.poss.x + (image.width /2);
+			if (realText.textWidth + x > this.width) {
+				console.log("over width");
+				x -= realText.textWidth;
+			}
+			for (var ii = 0; ii < realText.text.length; ii++) {
+				
+				this.ctx.fillText(realText.text[ii], x, user.poss.y - ((realText.text.length - ii) * 15));
+			}
+		}
 	}
 }

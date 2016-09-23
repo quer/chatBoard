@@ -6,8 +6,6 @@ var io = require('socket.io').listen(server);
 var lobbyController = require('./Controlles/lobbyControlles');
 console.log(lobbyController.getAllLobyes());
 
-var	user = [];
-
 server.listen(80);
 app.use("/site/", express.static(__dirname + '/site/'));
 app.get('/', function (req, res) {
@@ -19,9 +17,20 @@ io.sockets.on('connection', function (socket) {
   socket.emit("lobbys", lobbyController.getAllLobyes());
   var userObj = null;
   var lobby = null;
+  socket.on('disconnect', function () {
+    if (userObj != null) {
+      console.log("Dc: " + userObj.name);
+      if (lobby != null) {
+        console.log("from lobby: " + lobby.name);
+        lobby.removeUser(userObj.id);
+        lobby.updateUsers();
+        lobby = null;
+      }
+      userObj = null;
+    }
+  })
   socket.on('login', function (name, id) {
   	userObj = {"name": name, "id": id, "socket": socket};
-  	user.push(userObj);
   	socket.emit("lobbys", lobbyController.getAllLobyes());
   });
 
@@ -61,6 +70,7 @@ io.sockets.on('connection', function (socket) {
   });
   socket.on('chat', function (text) {
   	if (lobby != null) {
+      console.log("chat: "+ text);
   		userObj.chat = {"text": text, "time": new Date().getTime()};
   		lobby.updateUsers();
   	}

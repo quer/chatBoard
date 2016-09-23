@@ -4,7 +4,7 @@ var chat = function (argument) {
 		this.text += letter;
 	}
 	this.removeLetter = function () {
-		this.text = text.slice(0, -1);
+		this.text = this.text.slice(0, -1);
 	}
 	this.emit = function (socket) {
 		socket.emit("chat", this.text);
